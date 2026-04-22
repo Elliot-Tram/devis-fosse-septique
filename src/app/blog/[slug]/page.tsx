@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
+import GithubSlugger from "github-slugger";
 import { getArticle, getAllArticles } from "@/lib/articles";
 
 export const dynamicParams = true;
@@ -73,18 +74,8 @@ function extractText(node: unknown): string {
   return "";
 }
 
-function slugifyHeading(text: string): string {
-  return text
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
-}
-
 function extractTocItems(content: string): { id: string; label: string }[] {
+  const slugger = new GithubSlugger();
   const items: { id: string; label: string }[] = [];
   const lines = content.split("\n");
   let inCodeBlock = false;
@@ -98,7 +89,7 @@ function extractTocItems(content: string): { id: string; label: string }[] {
     if (match) {
       const label = match[1].replace(/[*_`]/g, "").trim();
       if (label) {
-        items.push({ id: slugifyHeading(label), label });
+        items.push({ id: slugger.slug(label), label });
       }
     }
   }
